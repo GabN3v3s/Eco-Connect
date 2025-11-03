@@ -5,6 +5,7 @@ const db = require("../db");
 const router = express.Router();
 
 //Listar todos os projetos
+
 router.get("/", (req, res) => {
   db.query("SELECT * FROM projetos", (err, results) => {
     if (err) return res.status(500).json({ error: err });
