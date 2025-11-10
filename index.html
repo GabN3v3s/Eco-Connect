@@ -11,31 +11,57 @@
 </head>
 
 <body class="bg-gray-50">
-  <!-- Navigation -->
-  <nav class="gradient-bg text-white shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
-        <div class="flex items-center">
-          <div class="text-2xl font-bold">🌱 EcoConnect</div>
-        </div>
-        <div class="hidden md:block">
-          <div class="ml-10 flex items-baseline space-x-4">
-            <button onclick="showPage('home')"
-              class="px-3 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors">Início</button>
-            <button onclick="showPage('projects')"
-              class="px-3 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors">Projetos</button>
-            <button onclick="showPage('transparency')"
-              class="px-3 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors">Transparência</button>
-            <button onclick="showPage('reports')"
-              class="px-3 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors">Relatórios</button>
-            <button onclick="showPage('login')"
-              class="bg-white text-green-600 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors">Entrar</button>
-          </div>
+ <!-- Navigation -->
+<nav class="gradient-bg text-white shadow-lg">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <div class="flex items-center">
+        <div class="text-2xl font-bold">🌱 EcoConnect</div>
+      </div>
+      
+      <!-- Desktop Menu -->
+      <div class="hidden md:block">
+        <div class="ml-10 flex items-baseline space-x-4">
+          <button onclick="showPage('home')"
+            class="px-3 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors">Início</button>
+          <button onclick="showPage('projects')"
+            class="px-3 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors">Projetos</button>
+          <button onclick="showPage('transparency')"
+            class="px-3 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors">Transparência</button>
+          <button onclick="showPage('reports')"
+            class="px-3 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors">Relatórios</button>
+          <button onclick="showPage('login')"
+            class="bg-white text-green-600 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors">Entrar</button>
         </div>
       </div>
+      
+      <!-- Mobile menu button -->
+      <div class="md:hidden">
+        <button id="mobile-menu-button" class="text-white hover:text-gray-300 focus:outline-none focus:text-gray-300">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
     </div>
-  </nav>
-
+    
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden">
+      <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+        <button onclick="showPage('home'); closeMobileMenu()"
+          class="block w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-green-700 transition-colors">Início</button>
+        <button onclick="showPage('projects'); closeMobileMenu()"
+          class="block w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-green-700 transition-colors">Projetos</button>
+        <button onclick="showPage('transparency'); closeMobileMenu()"
+          class="block w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-green-700 transition-colors">Transparência</button>
+        <button onclick="showPage('reports'); closeMobileMenu()"
+          class="block w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-green-700 transition-colors">Relatórios</button>
+        <button onclick="showPage('login'); closeMobileMenu()"
+          class="block w-full text-left px-3 py-2 rounded-md text-base font-medium bg-white text-green-600 hover:bg-gray-100 transition-colors mt-2">Entrar</button>
+      </div>
+    </div>
+  </div>
+</nav>
   <!-- Home Page -->
   <div id="home" class="page">
     <!-- Hero Section -->
@@ -442,6 +468,5 @@
 <script src="Frontend/JS/projects.js"></script>
 <script src="Frontend/JS/reports.js"></script>
 <script src="Frontend/JS/transparency.js"></script>
-  <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'988657d052de128c',t:'MTc1OTQzMDU4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
 </body>
 </html>

@@ -1,4 +1,3 @@
-// Reports
 function loadReportsData() {
   setTimeout(() => {
     createMonthlyGrowthChart();
@@ -8,8 +7,13 @@ function loadReportsData() {
 }
 
 function createMonthlyGrowthChart() {
-  const ctx = document.getElementById('monthlyGrowthChart').getContext('2d');
-  new Chart(ctx, {
+  const ctx = document.getElementById('monthlyGrowthChart');
+  
+  if (monthlyGrowthChart) {
+    monthlyGrowthChart.destroy();
+  }
+  
+  monthlyGrowthChart = new Chart(ctx, {
     type: 'line',
     data: {
       labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
@@ -39,8 +43,13 @@ function createMonthlyGrowthChart() {
 }
 
 function createRegionImpactChart() {
-  const ctx = document.getElementById('regionImpactChart').getContext('2d');
-  new Chart(ctx, {
+  const ctx = document.getElementById('regionImpactChart');
+  
+  if (regionImpactChart) {
+    regionImpactChart.destroy();
+  }
+  
+  regionImpactChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: ['Norte', 'Nordeste', 'Centro-Oeste', 'Sudeste', 'Sul'],
@@ -96,90 +105,4 @@ function loadProjectRanking() {
       </tr>
     `;
   }).join('');
-}
-
-// Dados de exemplo
-function loadSampleData() {
-  // Sample projects
-  projects = [
-    {
-      id: 1,
-      name: 'Reflorestamento da Mata Atlântica',
-      description: 'Projeto para restaurar 500 hectares de Mata Atlântica degradada com espécies nativas.',
-      location: 'São Paulo, SP',
-      goal: 250000,
-      raised: 187500,
-      donors: 156,
-      category: 'reflorestamento',
-      organization: 'Instituto Verde Vida',
-      image: '🌳'
-    },
-    {
-      id: 2,
-      name: 'Conservação Marinha Litoral Norte',
-      description: 'Proteção de recifes de coral e limpeza de praias no litoral norte.',
-      location: 'Ubatuba, SP',
-      goal: 180000,
-      raised: 142000,
-      donors: 89,
-      category: 'conservacao-marinha',
-      organization: 'ONG Mar Azul',
-      image: '🌊'
-    },
-    {
-      id: 3,
-      name: 'Proteção da Biodiversidade do Cerrado',
-      description: 'Monitoramento e proteção de espécies ameaçadas no Cerrado brasileiro.',
-      location: 'Brasília, DF',
-      goal: 320000,
-      raised: 98000,
-      donors: 67,
-      category: 'biodiversidade',
-      organization: 'Fundação Cerrado Vivo',
-      image: '🦋'
-    },
-    {
-      id: 4,
-      name: 'Energia Solar Comunitária',
-      description: 'Instalação de painéis solares em comunidades rurais da Amazônia.',
-      location: 'Manaus, AM',
-      goal: 450000,
-      raised: 276000,
-      donors: 203,
-      category: 'energia-renovavel',
-      organization: 'Amazônia Sustentável',
-      image: '⚡'
-    },
-    {
-      id: 5,
-      name: 'Educação Ambiental nas Escolas',
-      description: 'Programa de educação ambiental para 50 escolas públicas.',
-      location: 'Rio de Janeiro, RJ',
-      goal: 120000,
-      raised: 95000,
-      donors: 134,
-      category: 'educacao-ambiental',
-      organization: 'EcoEducar',
-      image: '📚'
-    },
-    {
-      id: 6,
-      name: 'Recuperação de Nascentes',
-      description: 'Projeto para recuperar e proteger nascentes em áreas rurais.',
-      location: 'Minas Gerais, MG',
-      goal: 200000,
-      raised: 156000,
-      donors: 98,
-      category: 'reflorestamento',
-      organization: 'Águas do Futuro',
-      image: '💧'
-    }
-  ];
-
-  // Sample donations
-  donations = [
-    { id: 1, projectId: 1, projectName: 'Reflorestamento da Mata Atlântica', amount: 500, donorName: 'Maria Silva', donorEmail: 'maria@email.com', date: '2024-01-15', status: 'completed' },
-    { id: 2, projectId: 2, projectName: 'Conservação Marinha Litoral Norte', amount: 250, donorName: 'João Santos', donorEmail: 'joao@email.com', date: '2024-01-14', status: 'completed' },
-    { id: 3, projectId: 1, projectName: 'Reflorestamento da Mata Atlântica', amount: 1000, donorName: 'Ana Costa', donorEmail: 'ana@email.com', date: '2024-01-13', status: 'completed' }
-  ];
 }

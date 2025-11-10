@@ -34,3 +34,21 @@
 .progress-bar {
   transition: width 0.8s ease-in-out;
 }
+#mobile-menu {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Ensure mobile menu appears above other content */
+nav {
+  position: relative;
+  z-index: 40;
+}
+
+#mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}

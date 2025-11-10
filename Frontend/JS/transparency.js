@@ -1,4 +1,3 @@
-// Transparencia.js - JavaScript
 function loadTransparencyData() {
   // Para dar tempo de renderizar a página antes de criar os gráficos
   setTimeout(() => {
@@ -10,8 +9,14 @@ function loadTransparencyData() {
 }
 
 function createFundsChart() {
-  const ctx = document.getElementById('fundsChart').getContext('2d');
-  new Chart(ctx, {
+  const ctx = document.getElementById('fundsChart');
+  
+  // Destroy existing chart if it exists
+  if (fundsChart) {
+    fundsChart.destroy();
+  }
+  
+  fundsChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
@@ -42,8 +47,14 @@ function createFundsChart() {
 }
 
 function createCategoryChart() {
-  const ctx = document.getElementById('categoryChart').getContext('2d');
-  new Chart(ctx, {
+  const ctx = document.getElementById('categoryChart');
+  
+  // Destroy existing chart if it exists
+  if (categoryChart) {
+    categoryChart.destroy();
+  }
+  
+  categoryChart = new Chart(ctx, {
     type: 'doughnut',
     data: {
       labels: ['Reflorestamento', 'Conservação Marinha', 'Biodiversidade', 'Energia Renovável'],
