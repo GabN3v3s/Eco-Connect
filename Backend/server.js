@@ -31,16 +31,25 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Test endpoint to check projects
 app.get("/api/test-projects", async (req, res) => {
   try {
-    const initializeDatabase = require("./db-sqlite");
-    const db = await initializeDatabase();
+    const { openDb } = require("./db-sqlite");
+    const db = await openDb();
     const projects = await db.all("SELECT * FROM projetos");
     res.json(projects);
   } catch (error) {
+    console.error("❌ Erro ao testar conexão com projetos:", error);
     res.status(500).json({ error: error.message });
   }
+});
+
+const path = require("path");
+
+// Servir os arquivos estáticos do frontend
+app.use(express.static(path.join(__dirname, "../Frontend")));
+
+app.get("/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../Frontend/index.html"));
 });
 
 const PORT = process.env.PORT || 5000;

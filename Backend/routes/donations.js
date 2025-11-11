@@ -1,48 +1,49 @@
 const express = require("express");
-const initializeDatabase = require("../db-sqlite");
+const { openDb } = require("../db-sqlite");
 
 const router = express.Router();
 
-// Initialize database connection
 let db;
-initializeDatabase().then(database => {
+openDb().then(database => {
   db = database;
-  console.log('✅ Donations routes connected to database');
+  console.log("✅ Donations routes connected to database");
 });
 
-// Registrar doação
+// 🔹 Registrar nova doação
 router.post("/", async (req, res) => {
   try {
-    const { projeto_id, nome, email, valor } = req.body;
+    const { projeto_id, nome_doador, email, valor } = req.body;
 
-    // For SQLite, we'll simulate the donor_id since we don't have proper user auth yet
-    const donor = await db.get("SELECT id FROM usuarios WHERE email = ?", [email]);
-    let donor_id = donor ? donor.id : null;
-
-    if (!donor_id) {
-      // Create a temporary donor record
-      const newDonor = await db.run(
-        "INSERT INTO usuarios (nome, email, senha, tipo) VALUES (?, ?, ?, ?)",
-        [nome, email, 'temp', 'doador']
-      );
-      donor_id = newDonor.lastID;
-    }
-
-    // Registrar doação
     await db.run(
-      "INSERT INTO doacoes (projeto_id, doador_id, valor) VALUES (?, ?, ?)",
-      [projeto_id, donor_id, valor]
+      "INSERT INTO doacoes (projeto_id, nome_doador, email, valor) VALUES (?, ?, ?, ?)",
+      [projeto_id, nome_doador, email, valor]
     );
 
-    // Atualizar total arrecadado do projeto
+    // Atualiza o total arrecadado no projeto
     await db.run(
-      "UPDATE projetos SET arrecadado = arrecadado + ? WHERE id = ?",
+      "UPDATE projetos SET totalArrecadado = totalArrecadado + ? WHERE id = ?",
       [valor, projeto_id]
     );
-    
+
     res.json({ message: "Doação registrada com sucesso!" });
   } catch (err) {
-    console.error("Erro ao registrar doação:", err);
+    console.error("❌ Erro ao registrar doação:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 🔹 Listar todas as doações
+router.get("/", async (req, res) => {
+  try {
+    const donations = await db.all(`
+      SELECT d.id, d.nome_doador, d.email, d.valor, d.data_doacao, p.nome AS projeto_nome
+      FROM doacoes d
+      JOIN projetos p ON d.projeto_id = p.id
+      ORDER BY d.data_doacao DESC
+    `);
+    res.json(donations);
+  } catch (err) {
+    console.error("❌ Erro ao buscar doações:", err);
     res.status(500).json({ error: err.message });
   }
 });
