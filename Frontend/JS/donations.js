@@ -1,4 +1,3 @@
-// Sistema de Doações - JavaScript
 function openDonationModal(projectId) {
   const project = projects.find(p => p.id === projectId);
   if (!project) return;
@@ -7,9 +6,9 @@ function openDonationModal(projectId) {
   const projectInfo = document.getElementById('donationProjectInfo');
   projectInfo.innerHTML = `
     <div class="text-center">
-      <div class="text-4xl mb-2">${project.image}</div>
-      <h4 class="text-lg font-semibold">${project.name}</h4>
-      <p class="text-gray-600">${project.location}</p>
+      <div class="text-4xl mb-2">${getProjectImage(project.categoria)}</div>
+      <h4 class="text-lg font-semibold">${project.nome}</h4>
+      <p class="text-gray-600">${project.localizacao}</p>
     </div>
   `;
 
@@ -23,7 +22,7 @@ function closeDonationModal() {
   currentDonationProject = null;
 }
 
-function handleDonation(event) {
+async function handleDonation(event) {
   event.preventDefault();
   if (!currentDonationProject) return;
 
@@ -32,23 +31,18 @@ function handleDonation(event) {
   const donorName = formData.get('name');
   const donorEmail = formData.get('email');
 
-  currentDonationProject.raised += amount;
-  currentDonationProject.donors += 1;
+  const donationData = {
+    projeto_id: currentDonationProject.id,
+    nome: donorName,
+    email: donorEmail,
+    valor: amount
+  };
 
-  donations.push({
-    id: Date.now(),
-    projectId: currentDonationProject.id,
-    projectName: currentDonationProject.name,
-    amount,
-    donorName,
-    donorEmail,
-    date: new Date().toISOString(),
-    status: 'completed'
-  });
-
-  closeDonationModal();
-  loadProjects();
-  updateStats();
-
-  alert(`Doação de R$ ${amount.toLocaleString()} realizada com sucesso!\nObrigado por apoiar o projeto "${currentDonationProject.name}".`);
+  try {
+    await createDonationAPI(donationData);
+    closeDonationModal();
+    alert(`Doação de R$ ${amount.toLocaleString()} realizada com sucesso!\nObrigado por apoiar o projeto "${currentDonationProject.nome}".`);
+  } catch (error) {
+    alert('Erro ao processar doação: ' + error.message);
+  }
 }

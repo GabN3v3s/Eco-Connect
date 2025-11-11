@@ -1,4 +1,3 @@
-// Registro e Login
 function selectUserType(type) {
   const donorBtn = document.getElementById('donorBtn');
   const orgBtn = document.getElementById('orgBtn');
@@ -19,19 +18,71 @@ function selectUserType(type) {
   }
 }
 
-function handleRegister(event) {
+async function handleRegister(event) {
   event.preventDefault();
-  alert('Cadastro realizado com sucesso! Você pode agora fazer login.');
-  showPage('login');
+  const formData = new FormData(event.target);
+  
+  const userData = {
+    nome: formData.get('name'),
+    email: formData.get('email'),
+    senha: formData.get('password'),
+    tipo: document.getElementById('donorBtn').classList.contains('border-green-500') ? 'doador' : 'organizacao'
+  };
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData)
+    });
+    
+    const result = await response.json();
+    if (response.ok) {
+      alert('Cadastro realizado com sucesso! Você pode agora fazer login.');
+      showPage('login');
+    } else {
+      throw new Error(result.message || 'Erro no cadastro');
+    }
+  } catch (error) {
+    alert('Erro no cadastro: ' + error.message);
+  }
 }
 
-function handleLogin(event) {
+async function handleLogin(event) {
   event.preventDefault();
-  currentUser = {
-    name: 'Usuário Demo',
-    email: 'demo@ecoconnect.com',
-    type: 'donor'
+  const formData = new FormData(event.target);
+  
+  const loginData = {
+    email: formData.get('email'),
+    senha: formData.get('password')
   };
-  alert('Login realizado com sucesso!');
-  showPage('projects');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(loginData)
+    });
+    
+    const result = await response.json();
+    if (response.ok) {
+      currentUser = {
+        name: 'Usuário Demo', // You might want to get this from the API response
+        email: loginData.email,
+        type: 'donor',
+        token: result.token
+      };
+      localStorage.setItem('token', result.token); // Store token for future requests
+      alert('Login realizado com sucesso!');
+      showPage('projects');
+    } else {
+      throw new Error(result.message || 'Erro no login');
+    }
+  } catch (error) {
+    alert('Erro no login: ' + error.message);
+  }
 }

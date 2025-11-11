@@ -9,28 +9,95 @@ let categoryChart = null;
 let monthlyGrowthChart = null;
 let regionImpactChart = null;
 
+// API Base URL
+const API_BASE_URL = 'http://localhost:5000/api';
+
+// Track if projects are already loaded
+let projectsLoaded = false;
+
 // Inicia a aplicação
 document.addEventListener('DOMContentLoaded', function () {
-  loadSampleData();
   showPage('home');
   updateStats();
-  
+
   // Add mobile menu event listener
   const mobileMenuButton = document.getElementById('mobile-menu-button');
   if (mobileMenuButton) {
     mobileMenuButton.addEventListener('click', toggleMobileMenu);
   }
-  
+
   // Close mobile menu when clicking outside
-  document.addEventListener('click', function(event) {
+  document.addEventListener('click', function (event) {
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuButton = document.getElementById('mobile-menu-button');
-    
+
     if (mobileMenu && !mobileMenu.contains(event.target) && !mobileMenuButton.contains(event.target)) {
       closeMobileMenu();
     }
   });
 });
+
+// API Functions
+async function loadProjectsFromAPI() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/projects`);
+    projects = await response.json();
+    projectsLoaded = true;
+    loadProjects(); // Update the UI
+  } catch (error) {
+    console.error('Erro ao carregar projetos:', error);
+    alert('Erro ao carregar projetos. Usando dados locais.');
+    loadSampleData(); // Fallback to local data
+  }
+}
+
+async function createProjectAPI(projectData) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/projects`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(projectData)
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      projectsLoaded = false; // Reset flag to reload projects
+      await loadProjectsFromAPI(); // Reload projects from API
+      return result;
+    } else {
+      throw new Error(result.error);
+    }
+  } catch (error) {
+    console.error('Erro ao criar projeto:', error);
+    throw error;
+  }
+}
+
+async function createDonationAPI(donationData) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/donations`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(donationData)
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      projectsLoaded = false; // Reset flag to reload projects
+      await loadProjectsFromAPI(); // Reload projects to update raised amounts
+      return result;
+    } else {
+      throw new Error(result.error);
+    }
+  } catch (error) {
+    console.error('Erro ao processar doação:', error);
+    throw error;
+  }
+}
 
 // Mobile menu functionality
 function toggleMobileMenu() {
@@ -55,7 +122,11 @@ function showPage(pageId) {
   closeMobileMenu();
 
   if (pageId === 'projects') {
-    loadProjects();
+    if (!projectsLoaded) {
+      loadProjectsFromAPI(); // Load projects only if not already loaded
+    } else {
+      loadProjects(); // Just render the already loaded projects
+    }
   } else if (pageId === 'transparency') {
     loadTransparencyData();
   } else if (pageId === 'reports') {
@@ -67,103 +138,47 @@ function showRegister() {
   showPage('register');
 }
 
-// Add this missing function
+// Update stats function
 function updateStats() {
+  const totalDonors = 1247;
+  const totalRaised = projects.reduce((sum, project) => sum + (project.arrecadado || 0), 0);
+  const treesPlanted = 45892;
+
   // Update home page stats
-  document.getElementById('totalDonors').textContent = '1,247';
+  document.getElementById('totalDonors').textContent = totalDonors.toLocaleString();
   document.getElementById('totalProjects').textContent = projects.length.toString();
-  document.getElementById('totalRaised').textContent = 'R$ 2.8M';
-  document.getElementById('treesPlanted').textContent = '45,892';
-  
+  document.getElementById('totalRaised').textContent = `R$ ${totalRaised.toLocaleString()}`;
+  document.getElementById('treesPlanted').textContent = treesPlanted.toLocaleString();
+
   // Update reports page stats
-  document.getElementById('reportTotalDonors').textContent = '1,247';
-  document.getElementById('reportTotalRaised').textContent = 'R$ 2.8M';
-  document.getElementById('reportTreesPlanted').textContent = '45,892';
+  document.getElementById('reportTotalDonors').textContent = totalDonors.toLocaleString();
+  document.getElementById('reportTotalRaised').textContent = `R$ ${totalRaised.toLocaleString()}`;
+  document.getElementById('reportTreesPlanted').textContent = treesPlanted.toLocaleString();
   document.getElementById('reportAreasRestored').textContent = '1,234';
 }
 
-// Add loadSampleData function to app.js
+// Fallback sample data (keep as backup)
 function loadSampleData() {
-  // Sample projects
   projects = [
     {
       id: 1,
-      name: 'Reflorestamento da Mata Atlântica',
-      description: 'Projeto para restaurar 500 hectares de Mata Atlântica degradada com espécies nativas.',
-      location: 'São Paulo, SP',
-      goal: 250000,
-      raised: 187500,
-      donors: 156,
-      category: 'reflorestamento',
-      organization: 'Instituto Verde Vida',
-      image: '🌳'
+      nome: 'Reflorestamento da Mata Atlântica',
+      descricao: 'Projeto para restaurar 500 hectares de Mata Atlântica degradada com espécies nativas.',
+      localizacao: 'São Paulo, SP',
+      meta: 250000,
+      arrecadado: 187500,
+      categoria: 'reflorestamento'
     },
     {
       id: 2,
-      name: 'Conservação Marinha Litoral Norte',
-      description: 'Proteção de recifes de coral e limpeza de praias no litoral norte.',
-      location: 'Ubatuba, SP',
-      goal: 180000,
-      raised: 142000,
-      donors: 89,
-      category: 'conservacao-marinha',
-      organization: 'ONG Mar Azul',
-      image: '🌊'
-    },
-    {
-      id: 3,
-      name: 'Proteção da Biodiversidade do Cerrado',
-      description: 'Monitoramento e proteção de espécies ameaçadas no Cerrado brasileiro.',
-      location: 'Brasília, DF',
-      goal: 320000,
-      raised: 98000,
-      donors: 67,
-      category: 'biodiversidade',
-      organization: 'Fundação Cerrado Vivo',
-      image: '🦋'
-    },
-    {
-      id: 4,
-      name: 'Energia Solar Comunitária',
-      description: 'Instalação de painéis solares em comunidades rurais da Amazônia.',
-      location: 'Manaus, AM',
-      goal: 450000,
-      raised: 276000,
-      donors: 203,
-      category: 'energia-renovavel',
-      organization: 'Amazônia Sustentável',
-      image: '⚡'
-    },
-    {
-      id: 5,
-      name: 'Educação Ambiental nas Escolas',
-      description: 'Programa de educação ambiental para 50 escolas públicas.',
-      location: 'Rio de Janeiro, RJ',
-      goal: 120000,
-      raised: 95000,
-      donors: 134,
-      category: 'educacao-ambiental',
-      organization: 'EcoEducar',
-      image: '📚'
-    },
-    {
-      id: 6,
-      name: 'Recuperação de Nascentes',
-      description: 'Projeto para recuperar e proteger nascentes em áreas rurais.',
-      location: 'Minas Gerais, MG',
-      goal: 200000,
-      raised: 156000,
-      donors: 98,
-      category: 'reflorestamento',
-      organization: 'Águas do Futuro',
-      image: '💧'
+      nome: 'Conservação Marinha Litoral Norte',
+      descricao: 'Proteção de recifes de coral e limpeza de praias no litoral norte.',
+      localizacao: 'Ubatuba, SP',
+      meta: 180000,
+      arrecadado: 142000,
+      categoria: 'conservacao-marinha'
     }
   ];
-
-  // Sample donations
-  donations = [
-    { id: 1, projectId: 1, projectName: 'Reflorestamento da Mata Atlântica', amount: 500, donorName: 'Maria Silva', donorEmail: 'maria@email.com', date: '2024-01-15', status: 'completed' },
-    { id: 2, projectId: 2, projectName: 'Conservação Marinha Litoral Norte', amount: 250, donorName: 'João Santos', donorEmail: 'joao@email.com', date: '2024-01-14', status: 'completed' },
-    { id: 3, projectId: 1, projectName: 'Reflorestamento da Mata Atlântica', amount: 1000, donorName: 'Ana Costa', donorEmail: 'ana@email.com', date: '2024-01-13', status: 'completed' }
-  ];
+  projectsLoaded = true;
+  loadProjects();
 }

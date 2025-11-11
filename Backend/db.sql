@@ -1,4 +1,4 @@
-CREATE DATABASE doacoes_ambientais;
+CREATE DATABASE IF NOT EXISTS doacoes_ambientais;
 USE doacoes_ambientais;
 
 -- Tabela de Usuários (Doador ou Organização)
@@ -94,3 +94,14 @@ INSERT INTO relatorios (projeto_id, titulo, descricao, valor_utilizado, progress
 (3, 'Etapa 1 - Oficinas educativas', 'Realizadas palestras e oficinas em 10 escolas.', 40000.00, 'Alunos participantes: 800'),
 (4, 'Etapa 1 - Instalação inicial', 'Painéis solares instalados em 3 comunidades.', 150000.00, 'Comunidades atendidas: 3'),
 (5, 'Etapa 1 - Monitoramento', 'Instalação de 25 câmeras de vigilância da fauna.', 80000.00, 'Câmeras instaladas: 25');
+
+ALTER TABLE projetos 
+ADD COLUMN categoria VARCHAR(255),
+ADD COLUMN arrecadado DECIMAL(10,2) DEFAULT 0;
+
+-- Add sample categories to match frontend
+UPDATE projetos SET categoria = 'reflorestamento' WHERE id = 1;
+UPDATE projetos SET categoria = 'conservacao-marinha' WHERE id = 2;
+UPDATE projetos SET categoria = 'educacao-ambiental' WHERE id = 3;
+UPDATE projetos SET categoria = 'energia-renovavel' WHERE id = 4;
+UPDATE projetos SET categoria = 'biodiversidade' WHERE id = 5;

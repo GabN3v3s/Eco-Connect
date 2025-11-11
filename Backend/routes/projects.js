@@ -1,30 +1,41 @@
-
 const express = require("express");
-const db = require("../db");
+const initializeDatabase = require("../db-sqlite");
 
 const router = express.Router();
 
-//Listar todos os projetos
+// Initialize database connection
+let db;
+initializeDatabase().then(database => {
+  db = database;
+  console.log('✅ Projects routes connected to database');
+});
 
-router.get("/", (req, res) => {
-  db.query("SELECT * FROM projetos", (err, results) => {
-    if (err) return res.status(500).json({ error: err });
-    res.json(results);
-  });
+// Listar todos os projetos
+router.get("/", async (req, res) => {
+  try {
+    const projects = await db.all("SELECT * FROM projetos");
+    res.json(projects);
+  } catch (err) {
+    console.error("Erro ao buscar projetos:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Criar novo projeto
-router.post("/", (req, res) => {
-  const { nome, descricao, localizacao, meta, categoria } = req.body;
+router.post("/", async (req, res) => {
+  try {
+    const { nome, descricao, localizacao, meta, categoria } = req.body;
 
-  db.query(
-    "INSERT INTO projetos (nome, descricao, localizacao, meta, categoria, arrecadado) VALUES (?, ?, ?, ?, ?, 0)",
-    [nome, descricao, localizacao, meta, categoria],
-    (err, result) => {
-      if (err) return res.status(500).json({ error: err });
-      res.json({ message: "Projeto cadastrado com sucesso!" });
-    }
-  );
+    const result = await db.run(
+      "INSERT INTO projetos (nome, descricao, localizacao, meta, categoria, arrecadado) VALUES (?, ?, ?, ?, ?, 0)",
+      [nome, descricao, localizacao, meta, categoria]
+    );
+    
+    res.json({ message: "Projeto cadastrado com sucesso!" });
+  } catch (err) {
+    console.error("Erro ao criar projeto:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
