@@ -48,8 +48,24 @@ const path = require("path");
 // Servir os arquivos estáticos do frontend
 app.use(express.static(path.join(__dirname, "../Frontend")));
 
-app.get("/*", (req, res) => {
+// Serve the main page for root route
+app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../Frontend/index.html"));
+});
+
+// SPA fallback - handle all other non-API routes
+app.use((req, res, next) => {
+  // Only handle GET requests that aren't API routes and haven't been handled by static files
+  if (req.method === 'GET' && !req.path.startsWith('/api/')) {
+    res.sendFile(path.join(__dirname, "../Frontend/index.html"));
+  } else {
+    // For API routes that don't exist, return 404
+    if (req.path.startsWith('/api/')) {
+      res.status(404).json({ error: 'API route not found' });
+    } else {
+      next();
+    }
+  }
 });
 
 const PORT = process.env.PORT || 5000;
@@ -57,5 +73,6 @@ app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
   console.log(`📊 Using SQLite database`);
   console.log(`🌐 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`📋 Test projects: http://localhost:${PORT}/api/test-projects`);
+  console.log(`📋 Projects: http://localhost:${PORT}/api/projects`);
+  console.log(`🌍 Frontend: http://localhost:${PORT}`);
 });

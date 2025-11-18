@@ -43,7 +43,7 @@ async function handleRegister(event) {
       alert('Cadastro realizado com sucesso! Você pode agora fazer login.');
       showPage('login');
     } else {
-      throw new Error(result.message || 'Erro no cadastro');
+      throw new Error(result.error || result.message || 'Erro no cadastro');
     }
   } catch (error) {
     alert('Erro no cadastro: ' + error.message);
@@ -60,6 +60,7 @@ async function handleLogin(event) {
   };
 
   try {
+    console.log("🔐 Attempting login...");
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
@@ -70,19 +71,28 @@ async function handleLogin(event) {
     
     const result = await response.json();
     if (response.ok) {
-      currentUser = {
-        name: 'Usuário Demo', // You might want to get this from the API response
-        email: loginData.email,
-        type: 'donor',
-        token: result.token
-      };
-      localStorage.setItem('token', result.token); // Store token for future requests
+      console.log("✅ Login successful:", result);
+      
+      // Store user data and token
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
+      
+      currentUser = result.user;
+      updateNavigation();
+      
       alert('Login realizado com sucesso!');
+      
+      // Load projects immediately after login
+      console.log("🔄 Loading projects after login...");
+      projectsLoaded = false; // Force reload
+      await loadProjectsFromAPI();
+      
       showPage('projects');
     } else {
-      throw new Error(result.message || 'Erro no login');
+      throw new Error(result.error || result.message || 'Erro no login');
     }
   } catch (error) {
+    console.error("❌ Login error:", error);
     alert('Erro no login: ' + error.message);
   }
 }

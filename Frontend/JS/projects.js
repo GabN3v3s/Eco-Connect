@@ -1,4 +1,10 @@
 function showProjectForm() {
+  if (!currentUser) {
+    alert('Você precisa estar logado para cadastrar um projeto. Por favor, faça login ou cadastre-se.');
+    showPage('login');
+    return;
+  }
+  
   document.getElementById('projectModal').classList.remove('hidden');
   document.getElementById('projectModal').classList.add('flex');
 }
@@ -13,11 +19,11 @@ async function handleProjectSubmit(event) {
   const formData = new FormData(event.target);
 
   const projectData = {
-    nome: formData.get('name') || event.target.querySelector('input[type="text"]').value,
-    descricao: formData.get('description') || event.target.querySelector('textarea').value,
-    localizacao: formData.get('location') || event.target.querySelectorAll('input[type="text"]')[1].value,
-    meta: parseInt(formData.get('goal')) || parseInt(event.target.querySelector('input[type="number"]').value),
-    categoria: formData.get('category') || event.target.querySelector('select').value
+    nome: formData.get('name'),
+    descricao: formData.get('description'),
+    localizacao: formData.get('location'),
+    meta: parseInt(formData.get('goal')),
+    categoria: formData.get('category')
   };
 
   try {
@@ -47,7 +53,23 @@ function loadProjects() {
   // Clear container completely before adding new content
   container.innerHTML = '';
 
-  console.log(`Loading ${projects.length} projects`); // Debug log
+  console.log(`📊 Loading ${projects.length} projects into UI`);
+
+  if (projects.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full text-center py-12">
+        <div class="text-6xl mb-4">🌱</div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Nenhum projeto encontrado</h3>
+        <p class="text-gray-600">Seja o primeiro a cadastrar um projeto ambiental!</p>
+        ${currentUser ? `
+          <button onclick="showProjectForm()" class="mt-4 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
+            + Cadastrar Primeiro Projeto
+          </button>
+        ` : ''}
+      </div>
+    `;
+    return;
+  }
 
   projects.forEach(project => {
     const progressPercentage = Math.min(((project.arrecadado || 0) / project.meta) * 100, 100);
