@@ -275,29 +275,29 @@
       <form onsubmit="handleProjectSubmit(event)" class="space-y-6">
         <div>
           <label class="block text-sm font-medium text-gray-700">Nome do Projeto</label>
-          <input type="text" required
+          <input type="text" name="name" required
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Descrição</label>
-          <textarea required rows="4"
+          <textarea name="description" required rows="4"
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"></textarea>
-        </div>
+      </div>
         <div class="grid md:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-medium text-gray-700">Localização</label>
-            <input type="text" required
+            <input type="text" name="location" required
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700">Meta (R$)</label>
-            <input type="number" required
+            <input type="number" name="goal" required
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
           </div>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Categoria</label>
-          <select required
+          <select name="category" required
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
             <option value="">Selecione uma categoria</option>
             <option value="reflorestamento">Reflorestamento</option>
@@ -316,21 +316,25 @@
   </div>
 
   <!-- Donation Modal -->
-  <div id="donationModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-2xl font-bold">Fazer Doação</h3>
-        <button onclick="closeDonationModal()" class="text-gray-500 hover:text-gray-700">✕</button>
+  <div id="donationModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-auto">
+      <div class="flex justify-between items-center p-6 border-b border-gray-200">
+        <h3 class="text-2xl font-bold text-gray-900">Fazer Doação</h3>
+        <button onclick="closeDonationModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">×</button>
       </div>
-      <div id="donationProjectInfo" class="mb-6">
-        <!-- Project info will be inserted here -->
+      
+      <div class="p-6">
+        <div id="donationProjectInfo" class="mb-6">
+          <!-- Project info will be inserted here -->
+        </div>
+        
+        <form onsubmit="handleDonation(event)" class="space-y-4">
+          <!-- Form content will be dynamically inserted -->
+        </form>
       </div>
-      <form onsubmit="handleDonation(event)" class="space-y-6">
-        <!-- Form content will be dynamically inserted -->
-      </form>
     </div>
   </div>
-
+  
   <!-- Transparency Page -->
   <div id="transparency" class="page hidden">
     <div class="py-12">

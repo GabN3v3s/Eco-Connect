@@ -68,6 +68,29 @@ app.use((req, res, next) => {
   }
 });
 
+// Debug endpoint to check user data
+app.get("/api/debug-user/:id", async (req, res) => {
+  try {
+    const { openDb } = require("./db-sqlite");
+    const db = await openDb();
+    const user = await db.get("SELECT * FROM usuarios WHERE id = ?", [req.params.id]);
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    res.json({
+      user: user,
+      tableInfo: {
+        columns: Object.keys(user)
+      }
+    });
+  } catch (error) {
+    console.error("Debug error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);

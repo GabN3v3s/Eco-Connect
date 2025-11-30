@@ -19,17 +19,45 @@ async function handleProjectSubmit(event) {
   const formData = new FormData(event.target);
 
   const projectData = {
-    nome: formData.get('name'),
-    descricao: formData.get('description'),
-    localizacao: formData.get('location'),
+    nome: formData.get('name')?.trim(),
+    descricao: formData.get('description')?.trim(),
+    localizacao: formData.get('location')?.trim(),
     meta: parseInt(formData.get('goal')),
     categoria: formData.get('category')
   };
 
+  console.log("📝 Dados do projeto a ser enviado:", projectData);
+
+  // Validação dos campos obrigatórios
+  if (!projectData.nome) {
+    alert('Por favor, preencha o nome do projeto.');
+    return;
+  }
+
+  if (!projectData.descricao) {
+    alert('Por favor, preencha a descrição do projeto.');
+    return;
+  }
+
+  if (!projectData.localizacao) {
+    alert('Por favor, preencha a localização do projeto.');
+    return;
+  }
+
+  if (!projectData.meta || projectData.meta <= 0) {
+    alert('Por favor, insira uma meta válida para o projeto.');
+    return;
+  }
+
+  if (!projectData.categoria) {
+    alert('Por favor, selecione uma categoria para o projeto.');
+    return;
+  }
+
   try {
     await createProjectAPI(projectData);
     closeProjectForm();
-    event.target.reset(); // Clear the form
+    event.target.reset();
     alert('Projeto cadastrado com sucesso!');
   } catch (error) {
     alert('Erro ao cadastrar projeto: ' + error.message);

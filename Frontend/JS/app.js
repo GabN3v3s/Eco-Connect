@@ -304,57 +304,34 @@ async function createProjectAPI(projectData) {
 async function createDonationAPI(donationData) {
   try {
     const token = localStorage.getItem('token');
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-    
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+    if (!token) {
+      throw new Error('Você precisa estar logado para fazer uma doação');
     }
 
     const response = await fetch(`${API_BASE_URL}/donations`, {
       method: 'POST',
-      headers: headers,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify(donationData)
     });
 
-    const result = await response.json();
-    if (response.ok) {
-      projectsLoaded = false;
-      await loadProjectsFromAPI();
-      return result;
-    } else {
-      throw new Error(result.error);
+    // First check if response is ok
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Erro ao processar doação');
     }
+
+    // Then parse the successful response
+    const result = await response.json();
+    
+    console.log("✅ createDonationAPI success:", result);
+    return result;
+
   } catch (error) {
     console.error('Erro ao processar doação:', error);
     throw error;
-  }
-}
-
-// Load user donations
-async function loadUserDonations() {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      donations = [];
-      return;
-    }
-
-    const response = await fetch(`${API_BASE_URL}/donations/my-donations`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    
-    if (response.ok) {
-      donations = await response.json();
-    } else if (response.status === 401) {
-      logout();
-    }
-  } catch (error) {
-    console.error('Erro ao carregar doações:', error);
-    donations = [];
   }
 }
 
@@ -381,74 +358,162 @@ async function loadDonationStats() {
 }
 
 // Show user's donations
-function showMyDonations() {
+async function showMyDonations() {
   if (!currentUser) {
     alert('Você precisa estar logado para ver suas doações.');
     showPage('login');
     return;
   }
-
-  const donationsContainer = document.getElementById('projectsList');
-  donationsContainer.innerHTML = `
-    <div class="col-span-full">
-      <div class="bg-white rounded-lg shadow-lg p-6">
-        <h3 class="text-2xl font-bold mb-6">💰 Minhas Doações</h3>
-        ${donations.length === 0 ? 
-          '<p class="text-gray-600 text-center py-8">Você ainda não fez nenhuma doação.</p>' : 
-          `
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Projeto</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Valor</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                ${donations.map(donation => `
-                  <tr>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="flex items-center">
-                        <div class="text-2xl mr-3">${getProjectImage(donation.projeto_categoria)}</div>
-                        <div>
-                          <div class="text-sm font-medium text-gray-900">${donation.projeto_nome}</div>
-                          <div class="text-sm text-gray-500">${donation.projeto_localizacao}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
-                      R$ ${donation.valor.toLocaleString()}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${new Date(donation.data_doacao).toLocaleDateString('pt-BR')}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                        Confirmada
-                      </span>
-                    </td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-          <div class="mt-4 p-4 bg-green-50 rounded-lg">
-            <p class="text-sm text-green-800">
-              <strong>Total doado:</strong> R$ ${donations.reduce((sum, d) => sum + d.valor, 0).toLocaleString()}
-            </p>
-          </div>
-          `
-        }
-        <button onclick="showPage('projects')" class="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-          ← Voltar para Projetos
-        </button>
-      </div>
-    </div>
-  `;
   
   showPage('projects');
+
+  try {
+    console.log("📋 Loading user donations...");
+    
+    // Load user donations first
+    await loadUserDonations();
+    
+    const donationsContainer = document.getElementById('projectsList');
+    
+    if (donations.length === 0) {
+      donationsContainer.innerHTML = `
+        <div class="col-span-full">
+          <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+            <div class="text-6xl mb-4">💰</div>
+            <h3 class="text-2xl font-bold mb-4">Minhas Doações</h3>
+            <p class="text-gray-600 mb-6">Você ainda não fez nenhuma doação.</p>
+            <button onclick="showPage('projects')" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
+              Explorar Projetos
+            </button>
+          </div>
+        </div>
+      `;
+    } else {
+      donationsContainer.innerHTML = `
+        <div class="col-span-full">
+          <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-2xl font-bold">💰 Minhas Doações</h3>
+              <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                ${donations.length} doação${donations.length !== 1 ? 'es' : ''}
+              </span>
+            </div>
+            
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Projeto</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Localização</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  ${donations.map(donation => `
+                    <tr class="hover:bg-gray-50">
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                          <div class="text-2xl mr-3">${getProjectImage(donation.projeto_categoria)}</div>
+                          <div>
+                            <div class="text-sm font-medium text-gray-900">${donation.projeto_nome}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${donation.projeto_localizacao}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">
+                        ${donation.projeto_categoria?.replace('-', ' ') || 'Geral'}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
+                        R$ ${donation.valor.toLocaleString()}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${new Date(donation.data_doacao).toLocaleDateString('pt-BR')}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                          Confirmada
+                        </span>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+              <div class="flex justify-between items-center">
+                <div>
+                  <p class="text-sm font-medium text-green-800">Total doado</p>
+                  <p class="text-lg font-bold text-green-900">
+                    R$ ${donations.reduce((sum, d) => sum + d.valor, 0).toLocaleString()}
+                  </p>
+                </div>
+                <button onclick="showPage('projects')" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                  ← Voltar para Projetos
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+  } catch (error) {
+    console.error('❌ Erro ao carregar doações:', error);
+    const donationsContainer = document.getElementById('projectsList');
+    donationsContainer.innerHTML = `
+      <div class="col-span-full">
+        <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+          <div class="text-6xl mb-4">❌</div>
+          <h3 class="text-2xl font-bold mb-4">Erro ao carregar doações</h3>
+          <p class="text-gray-600 mb-6">Não foi possível carregar seu histórico de doações.</p>
+          <button onclick="showPage('projects')" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
+            Voltar para Projetos
+          </button>
+        </div>
+      </div>
+    `;
+    showPage('projects');
+  }
+}
+
+async function loadUserDonations() {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      donations = [];
+      return;
+    }
+
+    console.log("🔄 Loading user donations from API...");
+    
+    const response = await fetch(`${API_BASE_URL}/donations/my-donations`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    console.log("📡 User donations response status:", response.status);
+    
+    if (response.ok) {
+      donations = await response.json();
+      console.log(`✅ Loaded ${donations.length} user donations`);
+    } else if (response.status === 401) {
+      console.log("❌ Token invalid for donations, logging out");
+      logout();
+    } else {
+      console.error("❌ Error loading donations:", response.status);
+      donations = [];
+    }
+  } catch (error) {
+    console.error('❌ Erro ao carregar doações:', error);
+    donations = [];
+  }
 }
 
 // Mobile menu functionality
@@ -546,4 +611,14 @@ function loadSampleData() {
   ];
   projectsLoaded = true;
   loadProjects();
+}
+function getProjectImage(category) {
+  const images = {
+    'reflorestamento': '🌳',
+    'conservacao-marinha': '🌊',
+    'biodiversidade': '🦋',
+    'energia-renovavel': '⚡',
+    'educacao-ambiental': '📚'
+  };
+  return images[category] || '🌱';
 }

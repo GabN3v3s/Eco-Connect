@@ -90,11 +90,23 @@ router.post("/login", async (req, res) => {
       });
     }
 
+    // Create token with ALL necessary user data
     const token = jwt.sign(
-      { id: user.id, email: user.email },
+      { 
+        id: user.id,      
+        email: user.email,
+        nome: user.nome,     
+        tipo: user.tipo 
+      },
       process.env.JWT_SECRET || "segredo",
-      { expiresIn: "1h" }
+      { expiresIn: "24h" } 
     );
+
+    console.log("✅ JWT Token generated for user:", {
+      id: user.id,
+      nome: user.nome,
+      email: user.email
+    });
 
     res.json({
       message: "Login realizado com sucesso!",
