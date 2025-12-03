@@ -2,7 +2,6 @@ function loadReportsData() {
   setTimeout(() => {
     createMonthlyGrowthChart();
     createRegionImpactChart();
-    loadProjectRanking();
   }, 100);
 }
 
@@ -74,35 +73,4 @@ function createRegionImpactChart() {
       }
     }
   });
-}
-
-function loadProjectRanking() {
-  const container = document.getElementById('projectRankingTable');
-  const sortedProjects = [...projects].sort((a, b) => b.raised - a.raised);
-
-  container.innerHTML = sortedProjects.slice(0, 10).map((project, index) => {
-    const progress = (project.raised / project.goal) * 100;
-    return `
-      <tr>
-        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${index + 1}º</td>
-        <td class="px-6 py-4 whitespace-nowrap">
-          <div class="flex items-center">
-            <div class="text-2xl mr-3">${project.image}</div>
-            <div class="text-sm font-medium text-gray-900">${project.name}</div>
-          </div>
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${project.category}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">R$ ${project.raised.toLocaleString()}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">R$ ${project.goal.toLocaleString()}</td>
-        <td class="px-6 py-4 whitespace-nowrap">
-          <div class="flex items-center">
-            <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-              <div class="bg-green-600 h-2 rounded-full" style="width: ${Math.min(progress, 100)}%"></div>
-            </div>
-            <span class="text-sm text-gray-900">${progress.toFixed(1)}%</span>
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
 }
